@@ -2,19 +2,17 @@ import { author as Author } from '../models/Author.js';
 import Book from '../models/Book.js';
 
 class BookController {
-  static async getAllBooks(req, res) {
+  static async getAllBooks(req, res, next) {
     try {
       const books = await Book.find();
 
       res.status(200).json(books);
     } catch (err) {
-      res.status(500).json({
-        message: `${err.message} - Request Error`,
-      });
+      next(err);
     }
   }
 
-  static async getBookById(req, res) {
+  static async getBookById(req, res, next) {
     try {
       const id = req.params.id;
 
@@ -27,13 +25,11 @@ class BookController {
         message: 'Success',
       });
     } catch (err) {
-      res.status(500).json({
-        message: `${err.message} - Request Error`,
-      });
+      next(err);
     }
   }
 
-  static async createBook(req, res) {
+  static async createBook(req, res, next) {
     const newBook = req.body;
 
     try {
@@ -49,15 +45,11 @@ class BookController {
 
       res.status(201).json({ message: 'Success on creating book', data: book });
     } catch (err) {
-      res.status(500).json({
-        message: `${err.message} - Error on creating a new book`,
-        error: true,
-        data: null,
-      });
+      next(err);
     }
   }
 
-  static async updateBook(req, res) {
+  static async updateBook(req, res, next) {
     try {
       const id = req.params.id;
 
@@ -70,13 +62,11 @@ class BookController {
         message: 'Success',
       });
     } catch (err) {
-      res.status(500).json({
-        message: `${err.message} - Request Error`,
-      });
+      next(err);
     }
   }
 
-  static async deleteBook(req, res) {
+  static async deleteBook(req, res, next) {
     try {
       const id = req.params.id;
 
@@ -88,13 +78,11 @@ class BookController {
         message: 'Success on deleting',
       });
     } catch (err) {
-      res.status(500).json({
-        message: `${err.message} - Request Error`,
-      });
+      next(err);
     }
   }
 
-  static async getBooksByPublisher(req, res) {
+  static async getBooksByPublisher(req, res, next) {
     const publisher = req.query.publisher;
 
     try {
@@ -107,9 +95,7 @@ class BookController {
         message: 'Success',
       });
     } catch (err) {
-      res.status(500).json({
-        message: `${err.message} - Request Error`,
-      });
+      next(err);
     }
   }
 }

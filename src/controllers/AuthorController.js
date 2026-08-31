@@ -1,19 +1,17 @@
-import { author as Author} from '../models/Author.js';
+import { author as Author } from '../models/Author.js';
 
 class AuthorController {
-  static async getAllAuthors(req, res) {
+  static async getAllAuthors(req, res, next) {
     try {
       const authors = await Author.find();
 
       res.status(200).json(authors);
     } catch (err) {
-      res.status(500).json({
-        message: `${err.message} - Request Error`,
-      });
+      next(err);
     }
   }
 
-  static async getAuthorById(req, res) {
+  static async getAuthorById(req, res, next) {
     try {
       const id = req.params.id;
 
@@ -26,28 +24,22 @@ class AuthorController {
         message: 'Success',
       });
     } catch (err) {
-      res.status(500).json({
-        message: `${err.message} - Request Error`,
-      });
+      next(err);
     }
   }
 
-  static async createAuthor(req, res) {
+  static async createAuthor(req, res, next) {
     try {
       const newAuthor = await Author.create(req.body);
       res
         .status(201)
         .json({ message: 'Success on creating Author', data: newAuthor });
     } catch (err) {
-      res.status(500).json({
-        message: `${err.message} - Error on creating a new Author`,
-        error: true,
-        data: null,
-      });
+      next(err);
     }
   }
 
-  static async updateAuthor(req, res) {
+  static async updateAuthor(req, res, next) {
     try {
       const id = req.params.id;
 
@@ -60,13 +52,11 @@ class AuthorController {
         message: 'Success',
       });
     } catch (err) {
-      res.status(500).json({
-        message: `${err.message} - Request Error`,
-      });
+      next(err);
     }
   }
 
-  static async deleteAuthor(req, res) {
+  static async deleteAuthor(req, res, next) {
     try {
       const id = req.params.id;
 
@@ -78,9 +68,7 @@ class AuthorController {
         message: 'Success on deleting',
       });
     } catch (err) {
-      res.status(500).json({
-        message: `${err.message} - Request Error`,
-      });
+      next(err);
     }
   }
 }
