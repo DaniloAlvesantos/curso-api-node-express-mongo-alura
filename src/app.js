@@ -2,6 +2,7 @@ import express from 'express';
 import connectToDatabase from './config/dbConnect.js';
 import routes from './routes/index.js';
 import { errorHandlerMiddleware } from './middlewares/errorHandler.js';
+import errorHandlerMiddleware404 from './middlewares/errorHandler404.js';
 
 const conn = await connectToDatabase();
 
@@ -13,6 +14,8 @@ conn.once('open', () => {
 const app = express();
 app.use(express.json());
 routes(app);
+
+app.use(errorHandlerMiddleware404);
 
 // Middleware de tratamento de erros
 // Captura qualquer erro que ocorra na aplicação

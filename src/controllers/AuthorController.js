@@ -1,3 +1,4 @@
+import { NotFoundError } from '../errors/NotFoundError.js';
 import { author as Author } from '../models/Author.js';
 
 class AuthorController {
@@ -18,6 +19,8 @@ class AuthorController {
       if (!id) throw new Error('ID is required');
 
       const author = await Author.findById(id);
+
+      if (!author) throw new NotFoundError('Author not found');
 
       res.status(200).json({
         data: author,
