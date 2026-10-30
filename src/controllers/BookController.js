@@ -83,12 +83,16 @@ class BookController {
   }
 
   static async getBooksByPublisher(req, res, next) {
-    const publisher = req.query.publisher;
+    const { publisher, title } = req.query;
+
+    // const regex = new RegExp(title, 'i'); // i for ignore case insensitive
+    const search = {};
+
+    if (publisher) search.publisher = publisher;
+    if (title) search.title = { $regex: title, $options: 'i' }; // Using mongoDB operators for regex search
 
     try {
-      const booksPerPublisher = await Book.find({
-        publisher: publisher,
-      });
+      const booksPerPublisher = await Book.find(search);
 
       res.status(200).json({
         data: booksPerPublisher,
