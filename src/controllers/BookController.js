@@ -4,9 +4,9 @@ import Book from '../models/Book.js';
 class BookController {
   static async getAllBooks(req, res, next) {
     try {
-      const books = await Book.find();
-
-      res.status(200).json(books);
+      const books = Book.find();
+      req.results = books;
+      next();
     } catch (err) {
       next(err);
     }
@@ -18,7 +18,7 @@ class BookController {
 
       if (!id) throw new Error('ID is required');
 
-      const book = await Book.findById(id);
+      const book = await Book.findById(id).populate('author');
 
       res.status(200).json({
         data: book,
@@ -55,7 +55,9 @@ class BookController {
 
       if (!id) throw new Error('ID is required');
 
-      const book = await Book.findByIdAndUpdate(id, req.body);
+      const book = await Book.findByIdAndUpdate(id, req.body).populate(
+        'author',
+      );
 
       res.status(200).json({
         data: book,
@@ -72,10 +74,11 @@ class BookController {
 
       if (!id) throw new Error('ID is required');
 
-      const book = await Book.findByIdAndDelete(id);
+      const book = await Book.findByIdAndDelete(id).populate('author');
 
       res.status(200).json({
         message: 'Success on deleting',
+        data: book,
       });
     } catch (err) {
       next(err);
@@ -83,25 +86,38 @@ class BookController {
   }
 
   static async getBooksByPublisher(req, res, next) {
-    const { publisher, title } = req.query;
-
     // const regex = new RegExp(title, 'i'); // i for ignore case insensitive
-    const search = {};
-
-    if (publisher) search.publisher = publisher;
-    if (title) search.title = { $regex: title, $options: 'i' }; // Using mongoDB operators for regex search
+    const search = await handleSearchQuery(req.query);
 
     try {
-      const booksPerPublisher = await Book.find(search);
+      const booksPerPublisher = Book.find(search).populate('author');
 
-      res.status(200).json({
-        data: booksPerPublisher,
-        message: 'Success',
-      });
+      req.results = booksPerPublisher;
+
+      next();
     } catch (err) {
       next(err);
     }
   }
+}
+
+async function handleSearchQuery(query) {
+  const search = {};
+
+  if (query.publisher) search.publisher = query.publisher;
+  if (query.title) search.title = { $regex: query.title, $options: 'i' }; // Using mongoDB operators for regex search
+  if (query.minPages || query.maxPages) search.pages = {};
+  if (query.minPages) search.pages.$gte = parseInt(query.minPages);
+  if (query.maxPages) search.pages.$lte = parseInt(query.maxPages);
+  if (query.author) {
+    const author = await Author.findOne({ name: query.author });
+
+    const authorId = author ? author._id : null;
+
+    if (authorId) search.author = authorId;
+  }
+
+  return search;
 }
 
 export default BookController;
